@@ -4,8 +4,8 @@
     "data_loader": {
         "name": "davis",
         "data_root": "datasets/",
-        "w": 432,
-        "h": 240,
+        "w": 216,
+        "h": 120,
         "sample_length": 5
     },
     "losses": {
@@ -20,7 +20,7 @@
         "beta2": 0.99,
         "lr": 1e-4,
         "d2glr": 1, 
-        "batch_size": 8,
+        "batch_size": 2,
         "num_workers": 2,
         "verbosity": 2,
         "log_step": 100,
