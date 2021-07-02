@@ -9,4 +9,4 @@ checkpoints
 examples/*_result.mp4
 *.jpg
 *.png
-.idea/
+/.idea/

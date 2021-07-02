@@ -61,13 +61,11 @@ class BaseNetwork(nn.Module):
             if hasattr(m, 'init_weights'):
                 m.init_weights(init_type, gain)
 
-
 class InpaintGenerator(BaseNetwork):
-    def __init__(self, init_weights=True):
+    def __init__(self, channel = 256, stack_num = 2, patchsize=None, init_weights=True):
         super(InpaintGenerator, self).__init__()
-        channel = 256
-        stack_num = 2
-        patchsize = [(18, 10), (9, 5)]
+        if patchsize is None:
+            patchsize = [(18, 10), (9, 5)]
         blocks = []
         for _ in range(stack_num):
             blocks.append(TransformerBlock(patchsize, hidden=channel))
@@ -97,6 +95,7 @@ class InpaintGenerator(BaseNetwork):
 
         if init_weights:
             self.init_weights()
+
 
     def forward(self, masked_frames, masks):
         # extracting features

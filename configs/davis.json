@@ -29,5 +29,10 @@
         "iterations": 50e4,
         "niter": 30e4,
         "niter_steady": 30e4
+    },
+    "net_params": {
+        "channel": 256,
+        "stack_num": 2,
+        "patchsize": [[18, 10], [9, 5]]
     }
 }

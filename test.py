@@ -37,7 +37,7 @@ parser.add_argument("--model",   type=str, default='sttn')
 args = parser.parse_args()
 
 
-w, h = 432, 240
+w, h = 216,120
 ref_length = 10
 neighbor_stride = 5
 default_fps = 24
