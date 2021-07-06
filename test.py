@@ -37,7 +37,7 @@ parser.add_argument("--model",   type=str, default='sttn')
 args = parser.parse_args()
 
 
-w, h = 216,120
+w, h = 432,240
 ref_length = 10
 neighbor_stride = 5
 default_fps = 24
@@ -135,7 +135,7 @@ def main_worker():
                 else:
                     comp_frames[idx] = comp_frames[idx].astype(
                         np.float32)*0.5 + img.astype(np.float32)*0.5
-    writer = cv2.VideoWriter(f"{args.mask}_result.mp4", cv2.VideoWriter_fourcc(*"mp4v"), default_fps, (w, h))
+    writer = cv2.VideoWriter(f"{args.mask}_result_orig.mp4", cv2.VideoWriter_fourcc(*"mp4v"), default_fps, (w, h))
     for f in range(video_length):
         comp = np.array(comp_frames[f]).astype(
             np.uint8)*binary_masks[f] + frames[f] * (1-binary_masks[f])
