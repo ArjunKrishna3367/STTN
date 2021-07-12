@@ -20,7 +20,7 @@
         "beta2": 0.99,
         "lr": 1e-4,
         "d2glr": 1, 
-        "batch_size": 4,
+        "batch_size": 1,
         "num_workers": 2,
         "verbosity": 2,
         "log_step": 100,
@@ -32,7 +32,7 @@
     },
     "net_params": {
         "channel": 256,
-        "stack_num": 8,
+        "stack_num": 2,
         "patchsize": [[18, 10], [9, 5]]
     }
 }

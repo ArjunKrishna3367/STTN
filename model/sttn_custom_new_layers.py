@@ -61,13 +61,11 @@ class BaseNetwork(nn.Module):
             if hasattr(m, 'init_weights'):
                 m.init_weights(init_type, gain)
 
-
 class InpaintGenerator(BaseNetwork):
-    def __init__(self, init_weights=True):
+    def __init__(self, channel = 256, stack_num = 8, patchsize=None, init_weights=True):
         super(InpaintGenerator, self).__init__()
-        channel = 256
-        stack_num = 8
-        patchsize = [(108, 60), (36, 20), (18, 10), (9, 5)]
+        if patchsize is None:
+            patchsize = [(108, 60), (36, 20), (18, 10), (9, 5)]
         blocks = []
         for _ in range(stack_num):
             blocks.append(TransformerBlock(patchsize, hidden=channel))
@@ -80,13 +78,19 @@ class InpaintGenerator(BaseNetwork):
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(128, channel, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(256, channel, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
         )
 
         # decoder: decode frames from features
         self.decoder = nn.Sequential(
-            deconv(channel, 128, kernel_size=3, padding=1),
+            deconv(channel, 256, kernel_size=3, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
@@ -97,6 +101,7 @@ class InpaintGenerator(BaseNetwork):
 
         if init_weights:
             self.init_weights()
+
 
     def forward(self, masked_frames, masks):
         # extracting features
