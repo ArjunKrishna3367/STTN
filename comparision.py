@@ -11,18 +11,21 @@ def compare(vidPath1, vidPath2, framesPerSec):
     success1, img1 = vidcap1.read()
     success2, img2 = vidcap2.read()
     success1 = success2 = True
+    SSIMTotal = 0
 
     while success1 and success2:
         print('Read a new frame: ', success1, success2)
         image1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         image2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)  # trainImage
         score, diff = compare_ssim(image1, image2, full=True, multichannel=False)
-        print("SSIM: {}".format(score))
+        SSIMTotal += score
         count = count + 1
         vidcap1.set(cv2.CAP_PROP_POS_MSEC, (count * (1 / framesPerSec) * 1000))  # added this line
         success1, img1 = vidcap1.read()
         vidcap2.set(cv2.CAP_PROP_POS_MSEC, (1 / framesPerSec))  # added this line
         success2, img2 = vidcap2.read()
+
+    print("Average SSIM: {}".format(SSIMTotal / count))
 
 
 def extractImages(pathIn, pathOut):

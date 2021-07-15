@@ -149,6 +149,6 @@ def main_worker():
 
 
 if __name__ == '__main__':
-    start = time()
+    start = time.time()
     atexit.register(timing.end_log)
     main_worker()
