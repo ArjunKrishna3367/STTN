@@ -13,6 +13,9 @@ import datetime
 import random
 import sys
 import json
+import atexit
+import timing
+
 
 import torch
 from torch.autograd import Variable
@@ -146,4 +149,6 @@ def main_worker():
 
 
 if __name__ == '__main__':
+    start = time()
+    atexit.register(timing.end_log)
     main_worker()
