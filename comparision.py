@@ -1,8 +1,19 @@
 import cv2
 from skimage.measure import compare_ssim
-
+from psnr_hvsm import psnr_hvs_hvsm
+import numpy as np
+from math import sqrt, log10
 import sys
 import argparse
+
+def PSNR(original, compressed):
+    mse = np.mean((original - compressed) ** 2)
+    if(mse == 0):  # MSE is zero means no noise is present in the signal .
+                  # Therefore PSNR have no importance.
+        return 100
+    max_pixel = 255.0
+    psnr = 20 * log10(max_pixel / sqrt(mse))
+    return psnr
 
 def compare(vidPath1, vidPath2, framesPerSec):
     count = 0
@@ -11,21 +22,36 @@ def compare(vidPath1, vidPath2, framesPerSec):
     success1, img1 = vidcap1.read()
     success2, img2 = vidcap2.read()
     success1 = success2 = True
-    SSIMTotal = 0
+    SSIM_total = 0
+    psnr_total = 0
+    psnr_total_cv2 = 0
+    psnr_hvsm_total = 0
 
     while success1 and success2:
         print('Read a new frame: ', success1, success2)
         image1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         image2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)  # trainImage
         score, diff = compare_ssim(image1, image2, full=True, multichannel=False)
-        SSIMTotal += score
+        SSIM_total += score
+        psnr_total += PSNR(image1, image2)
+        psnr_total_cv2 += cv2.PSNR(image1, image2)
+
+        image1 = image1.astype(float) / 255
+        image2 = image2.astype(float) / 255
+        psnr_hvs, psnr_hvsm = psnr_hvs_hvsm(image1, image2)
+        psnr_hvsm_total += psnr_hvsm
+
+
         count = count + 1
         vidcap1.set(cv2.CAP_PROP_POS_MSEC, (count * (1 / framesPerSec) * 1000))  # added this line
         success1, img1 = vidcap1.read()
         vidcap2.set(cv2.CAP_PROP_POS_MSEC, (1 / framesPerSec))  # added this line
         success2, img2 = vidcap2.read()
 
-    print("Average SSIM: {}".format(SSIMTotal / count))
+    print("Average SSIM: {}".format(SSIM_total / count))
+    print("Average PSNR: {}".format(psnr_total / count))
+    print("Average PSNR (OpenCV): {}".format(psnr_total_cv2 / count))
+    print("Average PSNR_HVS_M: {}".format(psnr_hvsm_total / count))
 
 
 def extractImages(pathIn, pathOut):

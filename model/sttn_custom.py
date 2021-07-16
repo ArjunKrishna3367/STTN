@@ -62,7 +62,7 @@ class BaseNetwork(nn.Module):
                 m.init_weights(init_type, gain)
 
 class InpaintGenerator(BaseNetwork):
-    def __init__(self, channel = 256, stack_num = 8, patchsize=None, init_weights=True):
+    def __init__(self, channel = 256, stack_num = 2, patchsize=None, init_weights=True):
         super(InpaintGenerator, self).__init__()
         if patchsize is None:
             patchsize = [(108, 60), (36, 20), (18, 10), (9, 5)]
