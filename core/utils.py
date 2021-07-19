@@ -48,7 +48,8 @@ class ZipReader(object):
     @staticmethod
     def imread(path, image_name):
         zfile = ZipReader.build_file_dict(path)
-        lastDir = os.path.basename(os.path.normpath(path))[:-4] + "/"
+        #lastDir = os.path.basename(os.path.normpath(path))[:-4] + "/"
+        lastDir = ""
         data = zfile.read(lastDir + image_name)
         im = Image.open(io.BytesIO(data))
         return im

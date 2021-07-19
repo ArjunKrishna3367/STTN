@@ -43,7 +43,7 @@ w, h = 432,240
 ref_length = 10
 neighbor_stride = 5
 default_fps = 24
-saved_video = "_result_model_1_full_size.mp4"
+saved_video = "_result_" + args.model + "_full_size.mp4"
 
 _to_tensors = transforms.Compose([
     Stack(),
