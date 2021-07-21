@@ -67,7 +67,6 @@ def get_ref_index(length, sample_length):
 
 if __name__=="__main__":
     a = argparse.ArgumentParser()
-    a.add_argument("--name", help="path to images")
     a.add_argument("--width", help="path to images", type=int)
     a.add_argument("--height", help="path to images", type=int)
     a.add_argument("--dataset", help="path to images")

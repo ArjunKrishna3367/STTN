@@ -15,6 +15,7 @@ import sys
 import json
 import atexit
 import timing
+import pathlib
 
 
 import torch
@@ -37,13 +38,17 @@ parser.add_argument("-v", "--video", type=str, required=True)
 parser.add_argument("-m", "--mask",   type=str, required=True)
 parser.add_argument("-c", "--ckpt",   type=str, required=True)
 parser.add_argument("--model",   type=str, default='sttn')
+parser.add_argument("--config", type=str, default="configs/davis.json")
 args = parser.parse_args()
+config = json.load(open(args.config))
+print(config)
 
-w, h = 432,240
+w, h = config["data_loader"]["w"], config["data_loader"]["h"]
 ref_length = 10
 neighbor_stride = 5
 default_fps = 24
-saved_video = "_result_" + args.model + "_full_size.mp4"
+path = pathlib.PurePath(args.ckpt)
+saved_video = "_result_" + path.parent.name + "_" + path.name + ".mp4"
 
 _to_tensors = transforms.Compose([
     Stack(),
@@ -89,24 +94,37 @@ def read_frame_from_videos(vname):
     return frames       
 
 
-def main_worker():
+def main_worker(video=args.video, ckpt=args.ckpt, model_data=args.model, mask=args.mask):
     # set up models 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    net = importlib.import_module('model.' + args.model)
-    model = net.InpaintGenerator().to(device)
-    model_path = args.ckpt
-    data = torch.load(args.ckpt, map_location=device)
+    net = importlib.import_module('model.' + model_data)
+    try:
+        net_params = config['net_params']
+        patchsize = [(patch[0], patch[1]) for patch in net_params['patchsize']]
+        print("Info", "channel", net_params['channel'],
+              "stack_num", net_params['stack_num'],
+              "patchsize", patchsize)
+        model = net.InpaintGenerator(
+            channel=net_params['channel'],
+            stack_num=net_params['stack_num'],
+            patchsize=patchsize
+        )
+        print('custom')
+    except:
+        model = net.InpaintGenerator().to(device)
+    model_path = ckpt
+    data = torch.load(ckpt, map_location=device)
     model.load_state_dict(data['netG'])
-    print('loading from: {}'.format(args.ckpt))
+    print('loading from: {}'.format(ckpt))
     model.eval()
 
     # prepare datset, encode all frames into deep space 
-    frames = read_frame_from_videos(args.video)
+    frames = read_frame_from_videos(video)
     video_length = len(frames)
     feats = _to_tensors(frames).unsqueeze(0)*2-1
     frames = [np.array(f).astype(np.uint8) for f in frames]
 
-    masks = read_mask(args.mask)
+    masks = read_mask(mask)
     binary_masks = [np.expand_dims((np.array(m) != 0).astype(np.uint8), 2) for m in masks]
     masks = _to_tensors(masks).unsqueeze(0)
     feats, masks = feats.to(device), masks.to(device)
@@ -116,7 +134,7 @@ def main_worker():
         feats = model.encoder((feats*(1-masks).float()).view(video_length, 3, h, w))
         _, c, feat_h, feat_w = feats.size()
         feats = feats.view(1, video_length, c, feat_h, feat_w)
-    print('loading videos and masks from: {}'.format(args.video))
+    print('loading videos and masks from: {}'.format(video))
 
     # completing holes by spatial-temporal transformers
     for f in range(0, video_length, neighbor_stride):
@@ -138,17 +156,18 @@ def main_worker():
                 else:
                     comp_frames[idx] = comp_frames[idx].astype(
                         np.float32)*0.5 + img.astype(np.float32)*0.5
-    writer = cv2.VideoWriter(f"{args.mask}" + saved_video, cv2.VideoWriter_fourcc(*"mp4v"), default_fps, (w, h))
+    writer = cv2.VideoWriter(f"{mask}" + saved_video, cv2.VideoWriter_fourcc(*"mp4v"), default_fps, (w, h))
     for f in range(video_length):
         comp = np.array(comp_frames[f]).astype(
             np.uint8)*binary_masks[f] + frames[f] * (1-binary_masks[f])
         writer.write(cv2.cvtColor(np.array(comp).astype(np.uint8), cv2.COLOR_BGR2RGB))
     writer.release()
-    print('Finish in {}'.format(f"{args.mask}_result.mp4"))
+    print('Finish in {}'.format(f"{mask}"+ saved_video))
 
 
 
 if __name__ == '__main__':
     start = time.time()
     atexit.register(timing.end_log)
+
     main_worker()
