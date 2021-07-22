@@ -28,9 +28,9 @@ def compare(vidPath1, vidPath2, framesPerSec):
     psnr_hvsm_total = 0
 
     while success1 and success2:
-        print('Read a new frame: ', success1, success2)
         image1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         image2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)  # trainImage
+        image1 = cv2.resize(image1, image2.shape[::-1])
         score, diff = compare_ssim(image1, image2, full=True, multichannel=False)
         SSIM_total += score
         psnr_total += PSNR(image1, image2)
@@ -49,7 +49,7 @@ def compare(vidPath1, vidPath2, framesPerSec):
         success2, img2 = vidcap2.read()
 
     print("Average SSIM: {}".format(SSIM_total / count))
-    print("Average PSNR: {}".format(psnr_total / count))
+    # print("Average PSNR: {}".format(psnr_total / count))
     print("Average PSNR (OpenCV): {}".format(psnr_total_cv2 / count))
     print("Average PSNR_HVS_M: {}".format(psnr_hvsm_total / count))
 
@@ -61,7 +61,6 @@ def extractImages(pathIn, pathOut):
     print(success)
     success = True
     while success:
-        print ('Read a new frame: ', success)
         cv2.imwrite( pathOut + "\\frame%d.jpg" % count, image)     # save frame as JPEG file
         count = count + 1
         vidcap.set(cv2.CAP_PROP_POS_MSEC, (count * 1000))  # added this line

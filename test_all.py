@@ -16,8 +16,9 @@ print(config)
 
 timings = {}
 
+
 if __name__ == '__main__':
-    for video in os.listdir(args.video_dir):
+    for video in sorted(os.listdir(args.video_dir)):
         video_path = args.video_dir + "/" + video
         mask_path = args.mask_dir + "/" + video[:-4]
         start_time = time.time()
