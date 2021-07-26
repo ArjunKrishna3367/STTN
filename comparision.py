@@ -41,17 +41,20 @@ def compare(vidPath1, vidPath2, framesPerSec):
         psnr_hvs, psnr_hvsm = psnr_hvs_hvsm(image1, image2)
         psnr_hvsm_total += psnr_hvsm
 
-
         count = count + 1
-        vidcap1.set(cv2.CAP_PROP_POS_MSEC, (count * (1 / framesPerSec) * 1000))  # added this line
+        # vidcap1.set(cv2.CAP_PROP_POS_MSEC, (count * (1 / framesPerSec) * 1000))  # added this line
         success1, img1 = vidcap1.read()
-        vidcap2.set(cv2.CAP_PROP_POS_MSEC, (1 / framesPerSec))  # added this line
+        # vidcap2.set(cv2.CAP_PROP_POS_MSEC, (count * (1 / framesPerSec) * 1000))  # added this line
         success2, img2 = vidcap2.read()
 
-    print("Average SSIM: {}".format(SSIM_total / count))
+    avg_SSIM = SSIM_total/count
+    avg_PSNR = psnr_total_cv2/count
+    avg_PSNR_HVS_M = psnr_hvsm_total/count
+    print("Average SSIM: {}".format(avg_SSIM))
     # print("Average PSNR: {}".format(psnr_total / count))
-    print("Average PSNR (OpenCV): {}".format(psnr_total_cv2 / count))
-    print("Average PSNR_HVS_M: {}".format(psnr_hvsm_total / count))
+    print("Average PSNR (OpenCV): {}".format(avg_PSNR))
+    print("Average PSNR_HVS_M: {}".format(avg_PSNR_HVS_M))
+    return avg_SSIM, avg_PSNR, avg_PSNR_HVS_M
 
 
 def extractImages(pathIn, pathOut):

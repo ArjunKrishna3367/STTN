@@ -1,8 +1,8 @@
 import os
 import shutil
 
-full_dir = "/home/gsu/Documents/lowres_trimmed_vids/"
-directory = os.fsencode("/home/gsu/Documents/lowres_trimmed_vids")
+full_dir = "/home/akrish3367/Documents/lowres_trimmed_vids/"
+directory = os.fsencode("/home/akrish3367/Documents/lowres_trimmed_vids")
 
 #copy zip file data
 # for folder in os.listdir(directory):

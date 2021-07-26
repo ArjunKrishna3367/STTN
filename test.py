@@ -108,7 +108,7 @@ def main_worker(video=args.video, ckpt=args.ckpt, model_data=args.model, mask=ar
             channel=net_params['channel'],
             stack_num=net_params['stack_num'],
             patchsize=patchsize
-        )
+        ).to(device)
         print('custom')
     except:
         model = net.InpaintGenerator().to(device)
