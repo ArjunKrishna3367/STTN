@@ -130,6 +130,7 @@ def main_worker(video=args.video, ckpt=args.ckpt, model_data=args.model, mask=ar
     feats, masks = feats.to(device), masks.to(device)
     comp_frames = [None]*video_length
 
+    start_time = time.time()
     with torch.no_grad():
         feats = model.encoder((feats*(1-masks).float()).view(video_length, 3, h, w))
         _, c, feat_h, feat_w = feats.size()
@@ -156,6 +157,8 @@ def main_worker(video=args.video, ckpt=args.ckpt, model_data=args.model, mask=ar
                 else:
                     comp_frames[idx] = comp_frames[idx].astype(
                         np.float32)*0.5 + img.astype(np.float32)*0.5
+    end_time = time.time() - start_time
+
     writer = cv2.VideoWriter(f"{mask}" + saved_video, cv2.VideoWriter_fourcc(*"mp4v"), default_fps, (w, h))
     for f in range(video_length):
         comp = np.array(comp_frames[f]).astype(
@@ -163,11 +166,10 @@ def main_worker(video=args.video, ckpt=args.ckpt, model_data=args.model, mask=ar
         writer.write(cv2.cvtColor(np.array(comp).astype(np.uint8), cv2.COLOR_BGR2RGB))
     writer.release()
     print('Finish in {}'.format(f"{mask}"+ saved_video))
-
-
+    print(end_time)
 
 if __name__ == '__main__':
-    start = time.time()
-    atexit.register(timing.end_log)
+    # start = time.time()
+    # atexit.register(timing.end_log)
 
     main_worker()

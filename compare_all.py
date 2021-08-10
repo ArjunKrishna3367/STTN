@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import time
+import csv
 
 parser = argparse.ArgumentParser(description="STTN")
 parser.add_argument("-o", "--orig_video_dir", type=str, required=True)
@@ -22,3 +23,9 @@ if __name__ == '__main__':
             print("failed")
 
 print(scores)
+
+keys = sorted(scores.keys())
+with open('scores_' + args.model_name + ".csv", "w") as file:
+        writer = csv.writer(file, delimiter = "\t")
+        writer.writerow(keys)
+        writer.writerows(zip(*[scores[key] for key in keys]))
