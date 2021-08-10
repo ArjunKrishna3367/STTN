@@ -60,9 +60,19 @@ class Trainer():
 
         # setup models including generator and discriminator
         net = importlib.import_module('model.'+config['model'])
-        net_params = self.config['net_params']
-        patchsize = [(patch[0], patch[1]) for patch in net_params['patchsize']]
-        self.netG = net.InpaintGenerator(channel = net_params['channel'], stack_num=net_params['stack_num'], patchsize=patchsize)
+        try:
+            net_params = self.config['net_params']
+            patchsize = [(patch[0], patch[1]) for patch in net_params['patchsize']]
+            print("Info", "channel", net_params['channel'],
+            "stack_num", net_params['stack_num'],
+            "patchsize" , patchsize)
+            self.netG = net.InpaintGenerator(
+                channel = net_params['channel'],
+                stack_num=net_params['stack_num'],
+                patchsize=patchsize
+            )
+        except:
+            self.netG = net.InpaintGenerator()
         self.netG = self.netG.to(self.config['device'])
         self.netD = net.Discriminator(
             in_channels=3, use_sigmoid=config['losses']['GAN_LOSS'] != 'hinge')
